@@ -49,4 +49,18 @@
     }
       
 }
-  
+
+.load-more {
+    padding: 10px 15px;
+    margin-left: 10px;
+    border-radius: 5px;
+    border: none; 
+    background-color: #6495ED;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: center;
+
+    &:hover {
+      background-color: lightgrey;
+    }
+}

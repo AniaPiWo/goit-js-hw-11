@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { fetchImages } from '../js/fetchImages';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
@@ -6,26 +6,10 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const input = document.querySelector('.search-form-input');
 const btnSearch = document.querySelector('.search-form-button');
 const gallery = document.querySelector('.gallery');
+const btnLoadMore = document.querySelector('.load-more');
 let gallerySimpleLightbox = new SimpleLightbox('.gallery a');
 
-
-const fetchImages = async (data, page) => {
-    return await fetch(
-      `https://pixabay.com/api/?key=32017695-e686be41b07e014b2e19f4e7c&q=${data}&orientation=horizontal&safesearch=true&image_type=photo&per_page=40&page=${page}`
-    )
-      .then(async response => {
-        if (!response.ok) {
-          if (response.status === 404) {
-            return [];
-          }
-          throw new Error(response.status);
-        }
-        return await response.json();
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }; 
+btnLoadMore.style.display = 'none';
 
 let pageNumber = 1;
 
@@ -44,13 +28,31 @@ btnSearch.addEventListener('click', e => {
         Notiflix.Notify.success(
           `Hooray! We found ${foundData.totalHits} images.`
         );
+        btnLoadMore.style.display = 'block';
         gallerySimpleLightbox.refresh();
       }
     });
   }
 });
 
-
+btnLoadMore.addEventListener('click', () => {
+  pageNumber++;
+  const trimmedValue = input.value.trim();
+  btnLoadMore.style.display = 'none';
+  fetchImages(trimmedValue, pageNumber).then(foundData => {
+    if (foundData.hits.length === 0) {
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    } else {
+      makeGallery(foundData.hits);
+      Notiflix.Notify.success(
+        `Hooray! We found ${foundData.totalHits} images.`
+      );
+      btnLoadMore.style.display = 'block';
+    }
+  });
+});
 
 function makeGallery(images) {
   console.log(images, 'images');
@@ -82,4 +84,5 @@ function makeGallery(images) {
 function cleanGallery() {
   gallery.innerHTML = '';
   pageNumber = 1;
+  btnLoadMore.style.display = 'none';
 }
