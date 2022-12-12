@@ -6,14 +6,12 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const input = document.querySelector('.search-form-input');
 const btnSearch = document.querySelector('.search-form-button');
 const gallery = document.querySelector('.gallery');
-const btnLoadMore = document.querySelector('.load-more');
 let gallerySimpleLightbox = new SimpleLightbox('.gallery a');
 
-btnLoadMore.style.display = 'none'; 
 
-const fetchImages = async (inputValue, pageNr) => {
+const fetchImages = async (data, page) => {
     return await fetch(
-      `https://pixabay.com/api/?key=31991989-c4f1a6d19fdfc7bd04eb6f952&q=${inputValue}&orientation=horizontal&safesearch=true&image_type=photo&per_page=40&page=${pageNr}`
+      `https://pixabay.com/api/?key=32017695-e686be41b07e014b2e19f4e7c&q=${data}&orientation=horizontal&safesearch=true&image_type=photo&per_page=40&page=${page}`
     )
       .then(async response => {
         if (!response.ok) {
@@ -27,7 +25,7 @@ const fetchImages = async (inputValue, pageNr) => {
       .catch(error => {
         console.error(error);
       });
-  };
+  }; 
 
 let pageNumber = 1;
 
@@ -42,37 +40,19 @@ btnSearch.addEventListener('click', e => {
           'Sorry, there are no images matching your search query. Please try again.'
         );
       } else {
-        renderImageList(foundData.hits);
+        makeGallery(foundData.hits);
         Notiflix.Notify.success(
           `Hooray! We found ${foundData.totalHits} images.`
         );
-        btnLoadMore.style.display = 'block';
         gallerySimpleLightbox.refresh();
       }
     });
   }
 });
 
-btnLoadMore.addEventListener('click', () => {
-  pageNumber++;
-  const trimmedValue = input.value.trim();
-  btnLoadMore.style.display = 'none';
-  fetchImages(trimmedValue, pageNumber).then(foundData => {
-    if (foundData.hits.length === 0) {
-      Notiflix.Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
-    } else {
-      renderImageList(foundData.hits);
-      Notiflix.Notify.success(
-        `Hooray! We found ${foundData.totalHits} images.`
-      );
-      btnLoadMore.style.display = 'block';
-    }
-  });
-});
 
-function renderImageList(images) {
+
+function makeGallery(images) {
   console.log(images, 'images');
   const markup = images
     .map(image => {
@@ -102,5 +82,4 @@ function renderImageList(images) {
 function cleanGallery() {
   gallery.innerHTML = '';
   pageNumber = 1;
-  btnLoadMore.style.display = 'none';
 }
